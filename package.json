@@ -9,7 +9,12 @@
   },
   "dependencies": {
     "core-js": "^3.8.3",
-    "vue": "^3.2.13"
+    "fs": "0.0.1-security",
+    "path": "^0.12.7",
+    "url": "^0.11.3",
+    "vue": "^3.2.13",
+    "vue-router": "^4.3.0",
+    "xstate": "^5.10.0"
   },
   "devDependencies": {
     "@babel/core": "^7.12.16",
@@ -32,7 +37,9 @@
     "parserOptions": {
       "parser": "@babel/eslint-parser"
     },
-    "rules": {}
+    "rules": {
+      "vue/multi-word-component-names": "off"
+    }
   },
   "browserslist": [
     "> 1%",

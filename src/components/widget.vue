@@ -1,0 +1,27 @@
+<template>
+  <form onsubmit="return false;">
+    <h4>{{ widget.title }} <span v-if="widget.required" :style="{ color: 'red' }">*</span></h4>
+    <component :is="widgetType" :config="config" :saveValue="saveValue" :onError="onError" />
+  </form>
+</template>
+
+<script>
+import widgetConfig from '../config/widgetConfig';
+
+export default {
+  name: 'Widget',
+  props: [
+    'config',
+    'saveValue',
+    'onError',
+  ],
+  setup: (props) => {
+    const widgetType = widgetConfig[props.config.type];
+
+    return {
+      widget: props.config,
+      widgetType,
+    };
+  }
+}
+</script>
