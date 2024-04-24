@@ -108,6 +108,19 @@ export default {
             { module: '1', step: '1_2' },
             { module: '2', step: '2_1' },
           ],
+          queries: {
+            outputs: [
+              {
+                id: 'test',
+                url: 'https://jsonplaceholder.typicode.com/posts', // fake API
+                params: [
+                  { key: 'pineaple', input: 'pineaple-on-pizza' },
+                  'whats-best-in-life',
+                ],
+              }
+            ],
+            inputs: [],
+          },
         }
       ]
     },
@@ -118,19 +131,38 @@ export default {
           id: '3_1',
           navigation: {
             previous: { module: '2', step: '2_2' },
+            next: { module: '3', step: '3_2' },
           },
           widgets: [
             {
               id: 'file-test',
               type: 'json-file',
-              title: 'Pls upload a file containing some JSON',
+              title: 'Pease upload a file containing some JSON',
             },
             {
               id: 'img-test',
               type: 'img-file',
-              title: 'Pls upload an image',
+              title: 'Please upload an image',
             },
-          ]
+          ],
+        },
+        {
+          id: '3_2',
+          navigation: {
+            previous: { module: '3', step: '3_1' },
+          },
+          widgets: [
+            {
+              id: 'recap-test',
+              type: 'recap',
+              title: 'Queries results recap',
+            },
+          ],
+          queries: {
+            inputs: [
+              { module: '2', step: '2_2' },
+            ]
+          }
         },
       ]
     },

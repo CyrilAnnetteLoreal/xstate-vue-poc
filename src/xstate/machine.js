@@ -1,4 +1,4 @@
-import { setup, emit } from 'xstate';
+import { setup, emit, fromPromise } from 'xstate';
 
 const debug = ({ context }, params) => {
   if (!context.debug) return;
@@ -76,6 +76,39 @@ const readPreviousInput = ({ context }) => {
 };
 
 export default setup({
+  actors: {
+    callAPIs: fromPromise(async (context) => {
+      const { queries, currentInputs } = context.input;
+      if (!queries) {
+        return null;
+      }
+      return await Promise.all(
+        queries.map((apiConfig) => {
+          const payload = (apiConfig?.params ?? [])
+            .reduce((acc, cur) => {
+              if (typeof cur === 'object') {
+                if (!cur.key || !currentInputs?.[cur?.input])
+                  return acc;
+                return { ...acc, [cur.key]: currentInputs[cur.input] };
+              } else {
+                if (!currentInputs[cur])
+                  return acc;
+                return { ...acc, [cur]: currentInputs[cur] }
+              }
+            }, {});
+          const options = {
+            method: 'POST',
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(payload)
+          }
+          return fetch(apiConfig.url, options)
+            .then((response) => response.json())
+        })
+      );
+    }),
+  },
   actions: {
     /* Config injection */
     readConfig: emit(({ context, event }) => {
@@ -186,6 +219,36 @@ export default setup({
           }, {});
       }
     },
+
+    /* Queries management */
+    storeQueryResponse: ({ context, event }) => {
+      /* remove any existing duplicate in history */
+      const existingEntryIndex = context.queries.history.findIndex((h) => {
+        return h.moduleId === context.routes.current.moduleId
+          && h.stepId === context.routes.current.stepId;
+      });
+      if (existingEntryIndex !== -1) {
+        context.queries.history.splice(existingEntryIndex, 1);
+      }
+
+      context.queries.current.response = event.output;
+      context.queries.history = [...context.queries.history, {
+        moduleId: context.routes.current.moduleId,
+        stepId: context.routes.current.stepId,
+        data: context.queries.current.response,
+      }];
+    },
+    readRequiredQueryInput: ({ context }) => {
+      context.queries.current.input = (context.routes.current.step?.queries?.inputs ?? [])
+        .reduce((acc, cur) => {
+          const outputData = context.queries.history
+            .find((h) => {
+              const { module: moduleId = context.routes.current.moduleId, step: stepId } = cur;
+              return h.moduleId === moduleId && h.stepId === stepId;
+            })?.data;
+          return { ...acc, ...outputData };
+        }, {});
+    },
   }
 })
   .createMachine({
@@ -212,6 +275,13 @@ export default setup({
           current: {},
           history: [],
         },
+        queries: {
+          current: {
+            response: {},
+            input: {},
+          },
+          history: [],
+        },
       }
     },
     initial: 'idle',
@@ -219,11 +289,27 @@ export default setup({
       idle: {
         on: {
           'INIT': {
-            target: 'ready',
+            target: 'loading',
             actions: [
               { type: 'readConfig' },
             ]
           }
+        }
+      },
+      loading: {
+        invoke: {
+          src: 'callAPIs',
+          input: ({ context }) => ({
+            queries: context.routes.current.step?.queries?.outputs,
+            currentInputs: context.input.current,
+          }),
+          onDone: {
+            target: 'ready',
+            actions: [
+              { type: 'storeQueryResponse' },
+              { type: 'readRequiredQueryInput' },
+            ],
+          },
         }
       },
       ready: {
@@ -234,6 +320,7 @@ export default setup({
         // ],
         on: {
           'NAVIGATE': {
+            target: 'loading',
             actions: [
               { type: 'storeCurrentOutput' },
               { type: 'navigate' },
@@ -242,6 +329,7 @@ export default setup({
             ]
           },
           'NEXT': {
+            target: 'loading',
             actions: [
               { type: 'storeCurrentOutput' },
               { type: 'next' },
@@ -257,13 +345,16 @@ export default setup({
             ]
           },
           'RESTART': {
+            target: 'loading',
             actions: [
               { type: 'restart' },
+              { type: 'readRequiredInputs' },
               { type: 'clearCurrentOutput' },
               { type: 'clearOutputHistory' },
             ]
           },
           'RESTART-STEP': {
+            target: 'loading',
             actions: [
               { type: 'restartStep' },
               { type: 'readRequiredInputs' },
@@ -271,6 +362,7 @@ export default setup({
             ]
           },
           'ERROR': {
+            target: 'loading',
             actions: [
               { type: 'fallback' },
               { type: 'clearCurrentOutput' },

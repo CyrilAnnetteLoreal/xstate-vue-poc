@@ -7,11 +7,16 @@
       OUTPUT: {{ output.current }}
       <br />
       INPUT: {{ input.current }}
+      <br />
+      <span v-if="queries.current.response">API RESULTS : {{ queries.current.response }}</span>
+      <!-- <br /> -->
+      <!-- <span v-if="Object.keys(queries.current.input).length > 0">QUERY INPUT : {{ queries.current.input }}</span> -->
     </p>
   </div>
 
   <div v-for="(widget) in currentStep?.widgets" :key="widget.id">
-    <Widget :config="widget" :saveValue="saveValue" :onError="onError" />
+    <Widget :config="widget" :output="output" :input="input" :queries="queries" :saveValue="saveValue"
+      :onError="onError" />
   </div>
 
   <hr />
@@ -51,11 +56,11 @@ export default {
 
     const currentModule = ref({});
     const currentStep = ref({});
+    
     const output = ref({});
     const input = ref({});
 
-    const outputKey = ref('');
-    const outputValue = ref('');
+    const queries = ref({});
 
     const canNext = ref(true);
 
@@ -70,6 +75,7 @@ export default {
         currentStep.value = { ...snapshot.context.routes.current.step };
         output.value = { ...snapshot.context.output };
         input.value = { ...snapshot.context.input };
+        queries.value = { ...snapshot.context.queries };
 
         /* Check if the user can click on next based on required step elements */
         canNext.value = (currentStep.value?.widgets ?? [])
@@ -97,8 +103,7 @@ export default {
       output,
       input,
 
-      outputKey,
-      outputValue,
+      queries,
 
       canNext,
 
