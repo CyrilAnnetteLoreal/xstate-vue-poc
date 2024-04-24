@@ -12,13 +12,8 @@
 export default {
   name: 'Widget',
   props: [
-    'config',
+    'widget',
     'saveValue',
   ],
-  setup: (props) => {
-    return {
-      widget: props.config,
-    }
-  }
 }
 </script>

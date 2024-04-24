@@ -6,13 +6,12 @@
 export default {
   name: 'Widget',
   props: [
-    'config',
+    'widget',
     'saveValue',
     'onError',
   ],
   setup: (props) => {
     return {
-      widget: props.config,
       onFileUpload: (e) => {
         const file = e.target.files[0];
         const reader = new FileReader();
@@ -22,7 +21,7 @@ export default {
               const { result } = reader;
               const decoded = window.atob(result.split(',')[1]); // decode the base64-encoded string
               const asJSON = JSON.parse(decoded);
-              props.saveValue(props.config.id, asJSON);
+              props.saveValue(props.widget.id, asJSON);
             }
             catch (e) {
               props.onError(e);

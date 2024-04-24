@@ -15,7 +15,7 @@
   </div>
 
   <div v-for="(widget) in currentStep?.widgets" :key="widget.id">
-    <Widget :config="widget" :output="output" :input="input" :queries="queries" :saveValue="saveValue"
+    <Widget :widget="widget" :output="output" :input="input" :queries="queries" :saveValue="saveValue"
       :onError="onError" />
   </div>
 

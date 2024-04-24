@@ -11,7 +11,7 @@ import widgetConfig from '../config/widgetConfig';
 export default {
   name: 'Widget',
   props: [
-    'config',
+    'widget',
     'saveValue',
     'onError',
     'output',
@@ -19,10 +19,9 @@ export default {
     'queries',
   ],
   setup: (props) => {
-    const widgetType = widgetConfig[props.config.type];
+    const widgetType = widgetConfig[props.widget.type];
 
     return {
-      widget: props.config,
       widgetType,
     };
   }
