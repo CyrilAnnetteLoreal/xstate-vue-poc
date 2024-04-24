@@ -82,7 +82,7 @@ export default {
             {
               id: 'whats-best-in-life',
               type: 'multiple-question',
-              title: 'What is best in life ?',
+              title: 'Conan! What is best in life ?',
               data: {
                 answers: [
                   'The open steppe',

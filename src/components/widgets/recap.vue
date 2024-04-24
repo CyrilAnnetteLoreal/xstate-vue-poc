@@ -6,7 +6,6 @@
 export default {
   name: 'Recap',
   props: [
-    'widget',
     'queries',
   ],
 }
