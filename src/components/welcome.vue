@@ -39,7 +39,6 @@ export default {
         props.actor.send({ type: 'INIT', data: exampleConfig });
       },
       onChange: (json) => {
-        console.log({ json });
         props.actor.send({ type: 'INIT', data: json });
       },
     }
