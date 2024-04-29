@@ -2,7 +2,6 @@ import { createApp } from 'vue'
 import { createMemoryHistory, createRouter } from 'vue-router'
 
 import actor from './xstate/index.js';
-import config from './xstate/config.js';
 
 import App from './App.vue'
 import Welcome from './components/welcome.vue'
@@ -14,7 +13,7 @@ const router = createRouter({
     {
       path: '/',
       component: Welcome,
-      props: { actor, config }
+      props: { actor }
     },
     {
       path: '/step/:moduleid/:stepid',

@@ -1,5 +1,5 @@
 <template>
-  <input type="file" :id="widget.id" @change="onFileUpload($event)" />
+  <input type="file" @change="onFileUpload($event)" />
 </template>
 
 <script>
@@ -9,6 +9,7 @@ export default {
     'widget',
     'saveValue',
     'onError',
+    'onChange'
   ],
   setup: (props) => {
     return {
@@ -21,10 +22,18 @@ export default {
               const { result } = reader;
               const decoded = window.atob(result.split(',')[1]); // decode the base64-encoded string
               const asJSON = JSON.parse(decoded);
-              props.saveValue(props.widget.id, asJSON);
+              if (props.onChange) {
+                props.onChange(asJSON);
+              }
+              else {
+                props.saveValue(props.widget.id, asJSON);
+              }
             }
             catch (e) {
-              props.onError(e);
+              if (props.onError)
+                props.onError(e);
+              else
+                console.log(e);
             }
           }, false);
           reader.readAsDataURL(file);

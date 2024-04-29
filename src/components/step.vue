@@ -26,13 +26,26 @@
       @click="previous">
       PREVIOUS
     </button>
+
     &nbsp;
     &nbsp;
+
     <button v-if="currentStep.navigation.next" v-bind:disabled="!currentStep?.navigation?.next || !canNext"
       @click="next">
       {{ Object.keys(output.current).length === 0 && (currentStep?.widgets ?? []).length > 0 ? 'Skip' : 'Next' }}
     </button>
-    <br /> <br />
+
+    &nbsp;
+    &nbsp;
+
+    <span v-for="(customRoute, index) in currentStep.navigation.custom" :key="index">
+      <button @click="navigate(customRoute.module, customRoute.step)">
+        {{ customRoute.title }}
+      </button>
+    </span>
+
+    <br /><br />
+
     <button @click="restart">RESTART</button>
   </div>
 </template>
@@ -107,6 +120,7 @@ export default {
 
       canNext,
 
+      navigate:(moduleId, stepId) => props.actor.send({ type: 'NAVIGATE', data: { moduleId, stepId } }),
       next: () => props.actor.send({ type: 'NEXT' }),
       previous: () => props.actor.send({ type: 'PREVIOUS' }),
       restart: () => props.actor.send({ type: 'RESTART' }),
