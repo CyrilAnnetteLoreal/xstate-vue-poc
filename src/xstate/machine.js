@@ -210,11 +210,25 @@ export default setup({
       } else {
         context.input.current = context.routes.current.step.inputs
           .reduce((acc, cur) => {
-            const outputData = context.output.history
+            let {
+              module: moduleId,
+              step: stepId,
+              id: inputId
+            } = cur;
+            let outputData = context.output.history
               .find((h) => {
-                const { module: moduleId = context.routes.current.moduleId, step: stepId } = cur;
-                return h.moduleId === moduleId && h.stepId === stepId;
+                if (!moduleId && stepId) {
+                  moduleId = context.routes.current.moduleId
+                }
+                if (moduleId && stepId)
+                  return h.moduleId === moduleId && h.stepId === stepId;
+                if (inputId)
+                  return h?.data[inputId] !== undefined;
               })?.data;
+
+            if (inputId && outputData?.[inputId])
+              outputData = { [inputId]: outputData[inputId] };
+
             return { ...acc, ...outputData };
           }, {});
       }
@@ -231,7 +245,7 @@ export default setup({
         context.queries.history.splice(existingEntryIndex, 1);
       }
 
-      context.queries.current.response = event.output;
+      context.queries.current.response = (event.output ?? []).reduce((acc, cur) => ({ ...acc, ...cur }), {}); // merge all response attributes
       context.queries.history = [...context.queries.history, {
         moduleId: context.routes.current.moduleId,
         stepId: context.routes.current.stepId,

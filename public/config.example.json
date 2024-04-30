@@ -64,7 +64,7 @@
           },
           "inputs": [
             {
-              "step": "1_1"
+              "id": "lotr-vs-sw"
             }
           ],
           "widgets": [
