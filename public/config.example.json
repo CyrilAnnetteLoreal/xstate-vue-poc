@@ -130,16 +130,11 @@
           },
           "inputs": [
             {
-              "module": "1",
-              "step": "1_1"
+              "id": "pineaple-on-pizza"
             },
             {
-              "module": "1",
-              "step": "1_2"
-            },
-            {
-              "module": "2",
-              "step": "2_1"
+              "id": "whats-best-in-life",
+              "type": "testType"
             }
           ],
           "queries": {

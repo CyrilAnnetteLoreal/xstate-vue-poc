@@ -1,4 +1,5 @@
 import { setup, emit, fromPromise } from 'xstate';
+import * as types from './types/index.js';
 
 const debug = ({ context }, params) => {
   if (!context.debug) return;
@@ -233,6 +234,20 @@ export default setup({
           }, {});
       }
     },
+    validateInputs: ({ context }) => {
+      (context.routes.current.step?.inputs ?? []).forEach((inputConfig) => {
+        if (!inputConfig.type) return;
+
+        const validate = types[inputConfig.type];
+        const currentInputToValidate = context.input.current[inputConfig?.id];
+        console.log({currentInputToValidate})
+        if (!currentInputToValidate) return;
+        const isValid = validate(currentInputToValidate);
+        if (!isValid) {
+          console.error(`Invalid input type: ${inputConfig?.id}`);
+        }
+      });
+    },
 
     /* Queries management */
     storeQueryResponse: ({ context, event }) => {
@@ -339,6 +354,7 @@ export default setup({
               { type: 'storeCurrentOutput' },
               { type: 'navigate' },
               { type: 'readRequiredInputs' },
+              { type: 'validateInputs' },
               { type: 'clearCurrentOutput' },
             ]
           },
@@ -348,6 +364,7 @@ export default setup({
               { type: 'storeCurrentOutput' },
               { type: 'next' },
               { type: 'readRequiredInputs' },
+              { type: 'validateInputs' },
               { type: 'clearCurrentOutput' },
             ]
           },
